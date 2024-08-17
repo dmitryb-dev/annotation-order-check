@@ -2,6 +2,7 @@ package io.github.dmitrybdev.checkstyle;
 
 import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
+import com.puppycrawl.tools.checkstyle.api.FullIdent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class AnnotationOrderCheck extends AbstractCheck {
         HashMap<String, ExpectedOrder> parsedTemplate = new HashMap<>();
 
         int lineNo = 0, order = 0;
-        for (String line : template.split("\n")) {
+        for (String line : template.split(",")) {
             for (String annotation : line.split("\\s+")) {
                 annotation = annotation.trim();
                 if (annotation.isBlank()) continue;
@@ -71,7 +72,7 @@ public class AnnotationOrderCheck extends AbstractCheck {
 
         for (DetailAST modifier = modifiers; modifier != null; modifier = modifier.getNextSibling()) {
             String modifierText = modifier.getType() == ANNOTATION
-                    ? "@" + modifier.getFirstChild().getNextSibling().getText()
+                    ? "@" + FullIdent.createFullIdent(modifier.getFirstChild().getNextSibling()).getText()
                     : modifier.getText();
 
             ExpectedOrder expectedOrder = getTemplate(ast).get(modifierText);

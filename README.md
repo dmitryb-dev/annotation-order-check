@@ -36,16 +36,16 @@ for example, using the `maven-checkstyle-plugin` in your `pom.xml`:
                         <module name="TreeWalker">
                             <module name="io.github.dmitrybdev.checkstyle.AnnotationOrderCheck">
                                 <property name="typeTemplate" value="
-                                    @Component @Lazy @Order
-                                    @Getter @Setter
+                                    @Component @Lazy @Order,
+                                    @Getter @Setter,
                                     public private final static
                                 "/>
                                 <property name="fieldTemplate" value="
-                                    @Lazy
+                                    @Lazy,
                                     @Getter @Setter public private final static @Nullable
                                 "/>
                                 <property name="methodTemplate" value="
-                                    @Bean @Lazy @Order
+                                    @Bean @Lazy @Order,
                                     public private final static @Nullable
                                 "/>
                             </module>
@@ -66,5 +66,5 @@ for example, using the `maven-checkstyle-plugin` in your `pom.xml`:
 
 
 ## Important Notes
-- Annotations and modifiers placed on the same line in the template must also be on the same line in the code.
-- Annotations and modifiers separated by a newline `\n` in the template must be placed on separate lines in the code.
+Annotations and modifiers separated by a space `" "` in the template must be on the same line in the code.
+Annotations and modifiers separated by a comma `","` in the template must be placed on separate lines in the code.

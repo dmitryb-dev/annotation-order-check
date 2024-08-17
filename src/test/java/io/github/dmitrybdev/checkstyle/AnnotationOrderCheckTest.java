@@ -19,16 +19,16 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
     @Override
     protected void configure(DefaultConfiguration configuration) {
         configuration.addProperty("typeTemplate", """
-            @Component @Lazy @Order
-            @Getter @Setter
+            @spring.Component @Lazy @Order,
+            @Getter @Setter,
             public private final static
         """);
         configuration.addProperty("fieldTemplate", """
-            @Lazy
+            @Lazy,
             @Getter @Setter public private final static @Nullable
         """);
         configuration.addProperty("methodTemplate", """
-            @Bean @Lazy @Order
+            @Bean @Lazy @Order,
             public private final static @Nullable
         """);
     }
@@ -40,7 +40,7 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
                 """
                 @Getter
                 @Setter @Scope
-                @Lazy @Component
+                @Lazy @spring.Component
                 public class TestClass {
                     @Getter @Lazy
                     private @Nullable final String field;
@@ -55,7 +55,7 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
                 List.of(
                         "@Setter must be placed on the same line with @Getter",
                         "@Lazy must be placed before @Setter",
-                        "@Component must be placed before @Lazy",
+                        "@spring.Component must be placed before @Lazy",
                         "@Lazy must be placed before @Getter",
                         "final must be placed before @Nullable",
                         "private must be placed on the new line after @Lazy",
@@ -65,7 +65,7 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
         ), entry(
                 // language=Java
                 """
-                @Component @Scope @Lazy
+                @spring.Component @Scope @Lazy
                 @Getter @Setter
                 public class TestClass {
                     @Lazy
