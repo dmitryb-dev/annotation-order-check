@@ -66,5 +66,5 @@ for example, using the `maven-checkstyle-plugin` in your `pom.xml`:
 
 
 ## Important Notes
-Annotations and modifiers separated by a space `" "` in the template must be on the same line in the code.
-Annotations and modifiers separated by a comma `","` in the template must be placed on separate lines in the code.
+- Annotations and modifiers separated by a space `" "` in the template must be on the same line in the code.
+- Annotations and modifiers separated by a comma `","` in the template must be placed on separate lines in the code.
