@@ -32,7 +32,7 @@ public class AnnotationOrderCheck extends AbstractCheck {
         HashMap<String, ExpectedOrder> parsedTemplate = new HashMap<>();
 
         int lineNo = 0, order = 0;
-        for (String line : template.split(",")) {
+        for (String line : template.split("\\s{3,}|,")) {
             for (String annotation : line.split("\\s+")) {
                 annotation = annotation.trim();
                 if (annotation.isBlank()) continue;

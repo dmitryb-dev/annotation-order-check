@@ -19,16 +19,15 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
     @Override
     protected void configure(DefaultConfiguration configuration) {
         configuration.addProperty("typeTemplate", """
-            @spring.Component @Lazy @Order,
-            @Getter @Setter,
+            @spring.Component @Lazy @Order, @Getter @Setter
             public private final static
         """);
         configuration.addProperty("fieldTemplate", """
-            @Lazy,
+            @Lazy
             @Getter @Setter public private final static @Nullable
         """);
         configuration.addProperty("methodTemplate", """
-            @Bean @Lazy @Order,
+            @Bean @Lazy @Order
             public private final static @Nullable
         """);
     }
