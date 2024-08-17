@@ -1,4 +1,6 @@
-# Custom Checkstyle Check for Annotation and Modifier Order
+# Checkstyle Check for Annotation and Modifier Order
+
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.dmitryb-dev/annotation-order-check.svg?label=Maven%20Central)](https://search.maven.org/artifact/io.github.dmitryb-dev/annotation-order-check)
 
 This Checkstyle check ensures that annotations and modifiers are in the correct order 
 and are placed on the same or separate lines as specified in configurable templates.
