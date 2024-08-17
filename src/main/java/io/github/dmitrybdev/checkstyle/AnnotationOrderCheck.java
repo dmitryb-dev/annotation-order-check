@@ -49,7 +49,7 @@ public class AnnotationOrderCheck extends AbstractCheck {
 
     @Override
     public int[] getDefaultTokens() {
-        return new int[] { CLASS_DEF, VARIABLE_DEF, CTOR_DEF, METHOD_DEF };
+        return new int[] { CLASS_DEF, INTERFACE_DEF, ANNOTATION_DEF, RECORD_DEF, VARIABLE_DEF, CTOR_DEF, METHOD_DEF };
     }
 
     @Override
@@ -84,7 +84,8 @@ public class AnnotationOrderCheck extends AbstractCheck {
                         "{0} must be placed before {1}", modifierText, lastFoundModifierText
                 );
             }
-            if (expectedOrder.lineNo() == lastFoundModifierExpectedOrder.lineNo()
+            if (!lastFoundModifierText.equals(modifierText)
+                    && expectedOrder.lineNo() == lastFoundModifierExpectedOrder.lineNo()
                     && modifier.getLineNo() != lastFoundModifierLineNo) {
                 log(
                         modifier.getLineNo(), modifier.getColumnNo(),
@@ -107,7 +108,7 @@ public class AnnotationOrderCheck extends AbstractCheck {
 
     private Map<String, ExpectedOrder> getTemplate(DetailAST ast) {
         return switch (ast.getType()) {
-            case CLASS_DEF -> typeTemplate;
+            case CLASS_DEF, INTERFACE_DEF, ANNOTATION_DEF, RECORD_DEF -> typeTemplate;
             case VARIABLE_DEF -> fieldTemplate;
             case CTOR_DEF, METHOD_DEF -> methodTemplate;
             default -> Map.of();
