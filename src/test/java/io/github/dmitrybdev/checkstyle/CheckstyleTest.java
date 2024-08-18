@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -26,7 +27,7 @@ public abstract class CheckstyleTest {
     protected abstract Class<? extends AbstractCheck> getCheckClass();
     protected abstract void configure(DefaultConfiguration configuration);
 
-    protected abstract Map<String, Collection<String>> createTestCases();
+    protected abstract void createTestCases(Map<String, Collection<String>> testCases);
 
 
     @ParameterizedTest
@@ -47,14 +48,16 @@ public abstract class CheckstyleTest {
         treeWalker.process(new File("Test.java"), new FileText(null, source.lines().toList()));
 
         Collection<String> actualViolations = check.getViolations().stream()
-                .map(Violation::getViolation)
+                .map(v -> "%d:%d %s".formatted(v.getLineNo(), v.getColumnNo(), v.getViolation()))
                 .toList();
 
         assertEquals(expectedViolations, actualViolations);
     }
 
     private Stream<Arguments> getTestCases() {
-        return createTestCases().entrySet().stream()
+        Map<String, Collection<String>> testCases = new LinkedHashMap<>();
+        createTestCases(testCases);
+        return testCases.entrySet().stream()
                 .map(entry -> Arguments.of(entry.getKey(), entry.getValue()));
     }
 }

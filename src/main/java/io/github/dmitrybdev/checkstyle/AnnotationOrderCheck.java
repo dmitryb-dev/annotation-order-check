@@ -34,11 +34,9 @@ public class AnnotationOrderCheck extends AbstractCheck {
         int lineNo = 0, order = 0;
         for (String line : template.split("\\s{3,}|,")) {
             for (String annotation : line.split("\\s+")) {
-                annotation = annotation.trim();
                 if (annotation.isBlank()) continue;
 
-                parsedTemplate.put(annotation, new ExpectedOrder(lineNo, order));
-                order++;
+                parsedTemplate.put(annotation.trim(), new ExpectedOrder(lineNo, order++));
             }
             lineNo++;
         }
