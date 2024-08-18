@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
@@ -51,7 +52,7 @@ public abstract class CheckstyleTest {
                 .map(v -> "%d:%d %s".formatted(v.getLineNo(), v.getColumnNo(), v.getViolation()))
                 .toList();
 
-        assertEquals(expectedViolations, actualViolations);
+        assertThat(actualViolations).containsExactlyElementsOf(expectedViolations);
     }
 
     private Stream<Arguments> getTestCases() {

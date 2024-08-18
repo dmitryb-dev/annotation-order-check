@@ -27,17 +27,18 @@ public class MemberGroupCheck extends AbstractCheck {
         int order = 0;
         Collection<ExpectedGroup> groups = new ArrayList<>();
         for (String group : groupsTemplate.split("\\s{3,}")) {
+            if (group.isBlank()) continue;
 
-            List<ExpectedMember> modifiersAlternatives = new ArrayList<>();
+            List<ExpectedMember> expectedMembers = new ArrayList<>();
             for (String modifiersAlternative : group.split(",")) {
-                Set<String> requiredModifiers = stream(modifiersAlternative.split("\\s+"))
+                Set<String> expectedModifiers = stream(modifiersAlternative.split("\\s+"))
                         .filter(not(String::isBlank))
                         .map(String::trim)
                         .collect(toCollection(LinkedHashSet::new));
-                modifiersAlternatives.add(new ExpectedMember(requiredModifiers));
+                expectedMembers.add(new ExpectedMember(expectedModifiers));
             }
 
-            groups.add(new ExpectedGroup(modifiersAlternatives, order++));
+            groups.add(new ExpectedGroup(expectedMembers, order++));
         }
         this.groups = groups;
     }
@@ -75,7 +76,7 @@ public class MemberGroupCheck extends AbstractCheck {
     public void visitToken(DetailAST ast) {
         DetailAST members = ast.findFirstToken(TokenTypes.OBJBLOCK).getFirstChild();
 
-        ExpectedGroup lastFoundGroup = new ExpectedGroup(List.of(), -1);
+        ExpectedGroup lastFoundGroup = null;
         int foundHelpers = 0;
 
         for (DetailAST member = members; member != null; member = member.getNextSibling()) {
@@ -85,7 +86,8 @@ public class MemberGroupCheck extends AbstractCheck {
             Set<String> modifiers = getModifiers(member);
 
             ExpectedGroup startsGroup = getStartsGroup(modifiers);
-            boolean isHelper = lastFoundGroup.matchesHelper(modifiers);
+            if (lastFoundGroup == null) lastFoundGroup = startsGroup;
+            boolean isHelper = lastFoundGroup != null && lastFoundGroup.matchesHelper(modifiers);
             int interval = getInterval(member);
 
             // When multiple members belongs to the same group -> require memberInterval
@@ -95,12 +97,12 @@ public class MemberGroupCheck extends AbstractCheck {
                     ? foundHelpers + 1
                     : 0;
 
-            requireInterval(member, startsGroup, isHelper);
+            requireInterval(member, startsGroup, isHelper, interval);
 
             if (startsGroup != null) {
                 if (startsGroup.order() < lastFoundGroup.order()) {
                     log(member.getLineNo(), member.getColumnNo(),
-                            "'{0}' members group must be placed before '{1}' group",
+                            "{0} members group must be placed before {1} group",
                             startsGroup.toString(), lastFoundGroup.toString());
                 }
                 lastFoundGroup = startsGroup;
@@ -114,7 +116,6 @@ public class MemberGroupCheck extends AbstractCheck {
                 .filter(group -> group.matchesGroupStartingMember(modifiers))
                 .findFirst().orElse(null);
     }
-
 
     private Set<String> getModifiers(DetailAST ast) {
         DetailAST modifiers = ast.findFirstToken(MODIFIERS).getFirstChild();
@@ -134,7 +135,6 @@ public class MemberGroupCheck extends AbstractCheck {
         return modifiersSet;
     }
 
-
     private int getExpectedMemberInterval(DetailAST member) {
         DetailAST prevMember = member.getPreviousSibling();
         if (isSingleLine(member) && (prevMember == null || isSingleLine(prevMember))) return singleLineMemberInterval;
@@ -143,6 +143,7 @@ public class MemberGroupCheck extends AbstractCheck {
 
     private int getInterval(DetailAST member) {
         int spaces = 0;
+        System.out.println("--- " + member.getLineNo() + " " + getLine(member.getLineNo() - 1).trim());
         for (int i = 0; i < member.getLineNo(); i++) {
             String line = getLine(member.getLineNo() - i - 2).trim();
             System.out.println((member.getLineNo() - i - 2) + " " + line);
@@ -161,39 +162,42 @@ public class MemberGroupCheck extends AbstractCheck {
     private boolean isSingleLine(DetailAST member) {
         if (member.getType() == LCURLY) {
             return member.getLineNo() - member.getParent().getParent().getLineNo() == 0;
-        } else {
-            return member.getLastChild().getLineNo() - member.getLineNo() == 0;
         }
+        if (member.getLastChild().getType() == SLIST) {
+            return member.getLastChild().getLastChild().getLineNo() - member.getLineNo() == 0;
+        }
+        return member.getLastChild().getLineNo() - member.getLineNo() == 0;
     }
 
     private void requireInterval(
             DetailAST member,
-            @Nullable ExpectedGroup startsGroup, boolean isHelper
+            @Nullable ExpectedGroup startsGroup, boolean isHelper,
+            int currentInterval
     ) {
-        int interval = getInterval(member);
         int expectedMemberInterval = getExpectedMemberInterval(member);
 
         if (startsGroup != null) {
-            if (interval == groupInterval) return;
             if (isHelper) {
+                if (currentInterval == expectedMemberInterval || currentInterval == groupInterval) return;
                 log(member.getLineNo(), member.getColumnNo(),
-                        "Member groups must be separated by {0} or {1} line(s). Current interval: {1} line(s)",
-                        expectedMemberInterval, groupInterval, interval);
+                        "Members must be separated by {0} or {1} line(s). Current interval: {2} line(s)",
+                        expectedMemberInterval, groupInterval, currentInterval);
             } else {
+                if (currentInterval == groupInterval) return;
                 log(member.getLineNo(), member.getColumnNo(),
                         "Member groups must be separated by {0} line(s). Current interval: {1} line(s)",
-                        groupInterval, interval);
+                        groupInterval, currentInterval);
             }
         } else {
-            if (interval == expectedMemberInterval) return;
+            if (currentInterval == expectedMemberInterval) return;
             if (expectedMemberInterval == memberInterval) {
                 log(member.getLineNo(), member.getColumnNo(),
                         "Members must be separated by {0} line(s). Current interval: {1} line(s)",
-                        expectedMemberInterval, interval);
+                        expectedMemberInterval, currentInterval);
             } else {
                 log(member.getLineNo(), member.getColumnNo(),
                         "Single-line members must be separated by {0} line(s). Current interval: {1} line(s)",
-                        expectedMemberInterval, interval);
+                        expectedMemberInterval, currentInterval);
             }
         }
     }
@@ -230,7 +234,7 @@ public class MemberGroupCheck extends AbstractCheck {
         }
 
         public boolean matches(Set<String> actualModifiers) {
-            return expectedModifiers.containsAll(actualModifiers);
+            return actualModifiers.containsAll(expectedModifiers);
         }
     }
 }

@@ -17,12 +17,12 @@ class MemberGroupCheckTest extends CheckstyleTest {
     @Override
     protected void configure(DefaultConfiguration configuration) {
         configuration.addProperty("groups", """
-            CLASS
-            private static FIELD
-            private FIELD
-            @Override public METHOD, private METHOD
-            public METHOD, private METHOD
-            private METHOD
+            private static <field>
+            private <field>
+            @Override public <method>, private <method>
+            public <method>, private <method>
+            private <method>
+            <class>
         """);
     }
 
@@ -109,6 +109,54 @@ class MemberGroupCheckTest extends CheckstyleTest {
                         "3:5 Members must be separated by 1 line(s). Current interval: 0 line(s)",
                         "5:5 Single-line members must be separated by 0 line(s). Current interval: 1 line(s)"
                 )
+        );
+
+        testCases.put(
+                // language=Java - Fields order with comments
+                """
+                @Annotation
+                public class TestClass {
+    
+                    private final String field1;
+    
+                    private void method1() {
+                    }
+    
+                    public void method2() {}
+    
+                    private void method3() {}
+    
+                    private final String field2;
+                }
+                """,
+                List.of(
+                        "6:5 Member groups must be separated by 2 line(s). Current interval: 1 line(s)",
+                        "9:5 Member groups must be separated by 2 line(s). Current interval: 1 line(s)",
+                        "9:5 public <method>, private <method> members group must be placed before private <method> group",
+                        "11:5 Members must be separated by 0 or 2 line(s). Current interval: 1 line(s)",
+                        "13:5 Member groups must be separated by 2 line(s). Current interval: 1 line(s)",
+                        "13:5 private <field> members group must be placed before private <method> group"
+                )
+        );
+        testCases.put(
+                // language=Java - Fields order with comments
+                """
+                @Annotation
+                public class TestClass {
+    
+                    private final String field1;
+                    private final String field2;
+    
+    
+                    public void method2() {}
+                    private void method3() {}
+    
+
+                    private void method1() {
+                    }
+                }
+                """,
+                List.of()
         );
     }
 }
