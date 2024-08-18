@@ -68,7 +68,7 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
                 public class TestClass {
                     @Lazy
                     @Getter private final @Nullable String field;
-    
+                
                     @Bean @Order
                     @Nullable int bean() {}
                 }

@@ -19,6 +19,8 @@ class MemberGroupCheckTest extends CheckstyleTest {
         configuration.addProperty("groups", """
             private static <field>
             private <field>
+            <constructor>, private <constructor>
+            private <constructor>
             @Override public <method>, private <method>
             public <method>, private <method>
             private <method>
@@ -33,11 +35,11 @@ class MemberGroupCheckTest extends CheckstyleTest {
                 // language=Java - Fields order with comments
                 """
                 public class TestClass {
-    
+                
                     private final String field;
                 
                     private final String field2;
-    
+                
                     /**
                      * Comment
                      */
@@ -47,10 +49,10 @@ class MemberGroupCheckTest extends CheckstyleTest {
                 }
                 """,
                 List.of(
-                        "3:5 Single-line members must be separated by 0 line(s). Current interval: 1 line(s)",
-                        "5:5 Single-line members must be separated by 0 line(s). Current interval: 1 line(s)",
-                        "10:5 Single-line members must be separated by 0 line(s). Current interval: 1 line(s)",
-                        "11:5 Members must be separated by 1 line(s). Current interval: 0 line(s)"
+                        "3:5 Single-line members must be separated by 0 lines. Current interval: 1 line",
+                        "5:5 Single-line members must be separated by 0 lines. Current interval: 1 line",
+                        "10:5 Single-line members must be separated by 0 lines. Current interval: 1 line",
+                        "11:5 Members must be separated by 1 line. Current interval: 0 lines"
                 )
         );
 
@@ -63,11 +65,11 @@ class MemberGroupCheckTest extends CheckstyleTest {
                   */
                 public class TestClass
                 {
-    
+                
                     private final String field;
                 }
                 """,
-                List.of("7:5 Members must be separated by 1 line(s). Current interval: 2 line(s)")
+                List.of("7:5 Members must be separated by 1 line. Current interval: 2 lines")
         );
         testCases.put(
                 // language=Java - Fields order with comments
@@ -75,11 +77,11 @@ class MemberGroupCheckTest extends CheckstyleTest {
                 @Annotation
                 public class TestClass
                 {
-    
+                
                     private final String field;
                 }
                 """,
-                List.of("5:5 Members must be separated by 1 line(s). Current interval: 2 line(s)")
+                List.of("5:5 Members must be separated by 1 line. Current interval: 2 lines")
         );
         testCases.put(
                 // language=Java - Fields order with comments
@@ -89,7 +91,7 @@ class MemberGroupCheckTest extends CheckstyleTest {
                     private final String field;
                 }
                 """,
-                List.of("3:5 Members must be separated by 1 line(s). Current interval: 0 line(s)")
+                List.of("3:5 Members must be separated by 1 line. Current interval: 0 lines")
         );
 
         // Order test
@@ -99,15 +101,15 @@ class MemberGroupCheckTest extends CheckstyleTest {
                 @Annotation
                 public class TestClass {
                     public final String field;
-    
+                
                     private final String field2;
                     public final String field3;
                     private final String field4;
                 }
                 """,
                 List.of(
-                        "3:5 Members must be separated by 1 line(s). Current interval: 0 line(s)",
-                        "5:5 Single-line members must be separated by 0 line(s). Current interval: 1 line(s)"
+                        "3:5 Members must be separated by 1 line. Current interval: 0 lines",
+                        "5:5 Single-line members must be separated by 0 lines. Current interval: 1 line"
                 )
         );
 
@@ -116,25 +118,25 @@ class MemberGroupCheckTest extends CheckstyleTest {
                 """
                 @Annotation
                 public class TestClass {
-    
+                
                     private final String field1;
-    
+                
                     private void method1() {
                     }
-    
+                
                     public void method2() {}
-    
+                
                     private void method3() {}
-    
+                
                     private final String field2;
                 }
                 """,
                 List.of(
-                        "6:5 Member groups must be separated by 2 line(s). Current interval: 1 line(s)",
-                        "9:5 Member groups must be separated by 2 line(s). Current interval: 1 line(s)",
+                        "6:5 Member groups must be separated by 2 lines. Current interval: 1 line",
+                        "9:5 Member groups must be separated by 2 lines. Current interval: 1 line",
                         "9:5 public <method>, private <method> members group must be placed before private <method> group",
-                        "11:5 Members must be separated by 0 or 2 line(s). Current interval: 1 line(s)",
-                        "13:5 Member groups must be separated by 2 line(s). Current interval: 1 line(s)",
+                        "11:5 Single-line members must be separated by 0 lines. Member groups must be separated by 2 lines. Current interval: 1 line",
+                        "13:5 Member groups must be separated by 2 lines. Current interval: 1 line",
                         "13:5 private <field> members group must be placed before private <method> group"
                 )
         );
@@ -143,17 +145,66 @@ class MemberGroupCheckTest extends CheckstyleTest {
                 """
                 @Annotation
                 public class TestClass {
-    
+                
                     private final String field1;
                     private final String field2;
-    
-    
+                
+                
                     public void method2() {}
                     private void method3() {}
-    
-
+                
+                
                     private void method1() {
                     }
+                }
+                """,
+                List.of()
+        );
+
+        // Constructors test
+        testCases.put(
+                // language=Java - Fields order with comments
+                """
+                public class TestClass {
+                
+                    public TestClass() {}
+                
+                    private TestClass() {}
+                    private TestClass() {
+                    }
+                
+                    public TestClass() {
+                
+                    }
+                    private TestClass() {}
+                }
+                """,
+                List.of(
+                        "3:5 Single-line members must be separated by 0 lines. Current interval: 1 line",
+                        "5:5 Single-line members must be separated by 0 lines. Member groups must be separated by 2 lines. Current interval: 1 line",
+                        "6:5 Members must be separated by 1 line. Current interval: 0 lines",
+                        "9:5 <constructor>, private <constructor> members group must be placed before private <constructor> group",
+                        "9:5 Member groups must be separated by 2 lines. Current interval: 1 line",
+                        "12:5 Members must be separated by 1 line. Member groups must be separated by 2 lines. Current interval: 0 lines"
+                )
+        );
+        testCases.put(
+                // language=Java - Fields order with comments
+                """
+                public class TestClass {
+                    public TestClass() {}
+                    private TestClass() {}
+                
+                    private TestClass() {
+                    }
+                
+                
+                    public TestClass() {
+                
+                    }
+                
+                
+                    private TestClass() {}
                 }
                 """,
                 List.of()
