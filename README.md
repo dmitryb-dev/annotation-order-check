@@ -42,6 +42,7 @@ for example, using the `maven-checkstyle-plugin` in your `pom.xml`:
                                 "/>
                                 <property name="fieldTemplate" value="
                                     @Lazy
+                                    @Getter() @Setter()
                                     @Getter @Setter public private final static @Nullable
                                 "/>
                                 <property name="methodTemplate" value="
@@ -68,3 +69,5 @@ for example, using the `maven-checkstyle-plugin` in your `pom.xml`:
 ## Important Notes
 - Annotations and modifiers separated by a space `" "` in the template must be on the same line in the code.
 - Annotations and modifiers separated by a comma `","` or three and more spaces `"   "` in the template must be placed on separate lines in the code.
+- You may define different positions for cases when an annotation has parentheses, using the `@Annotation()` and `@Annotation` syntax.
+- When only `@Annotation` syntax (without parentheses) is used, it matches both annotations with and without parentheses.

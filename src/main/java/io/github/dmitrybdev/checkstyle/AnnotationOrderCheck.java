@@ -3,11 +3,14 @@ package io.github.dmitrybdev.checkstyle;
 import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.FullIdent;
+import com.puppycrawl.tools.checkstyle.api.TokenTypes;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.puppycrawl.tools.checkstyle.api.TokenTypes.*;
+import static org.apache.commons.lang3.StringUtils.removeEnd;
 
 public class AnnotationOrderCheck extends AbstractCheck {
 
@@ -69,11 +72,10 @@ public class AnnotationOrderCheck extends AbstractCheck {
         ExpectedOrder lastFoundModifierExpectedOrder = new ExpectedOrder(-1, -1);
 
         for (DetailAST modifier = modifiers; modifier != null; modifier = modifier.getNextSibling()) {
-            String modifierText = modifier.getType() == ANNOTATION
-                    ? "@" + FullIdent.createFullIdent(modifier.getFirstChild().getNextSibling()).getText()
-                    : modifier.getText();
+            String modifierText = modifier.getType() == ANNOTATION ? getAnnotationText(modifier) : modifier.getText();
 
             ExpectedOrder expectedOrder = getTemplate(ast).get(modifierText);
+            if (expectedOrder == null) expectedOrder = getTemplate(ast).get(removeEnd(modifierText, "()"));
             if (expectedOrder == null) continue;
 
             if (expectedOrder.order() < lastFoundModifierExpectedOrder.order()) {
@@ -111,6 +113,12 @@ public class AnnotationOrderCheck extends AbstractCheck {
             case CTOR_DEF, METHOD_DEF -> methodTemplate;
             default -> Map.of();
         };
+    }
+
+    private String getAnnotationText(DetailAST modifier) {
+        DetailAST args = modifier.getFirstChild().getNextSibling().getNextSibling();
+        String argsText = args != null && args.getType() == LPAREN ? "()" : "";
+        return "@" + FullIdent.createFullIdent(modifier.getFirstChild().getNextSibling()).getText() + argsText;
     }
 
 
