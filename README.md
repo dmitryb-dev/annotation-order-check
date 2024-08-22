@@ -27,7 +27,7 @@ for example, using the `maven-checkstyle-plugin` in your `pom.xml`:
                 <dependency>
                     <groupId>io.github.dmitryb-dev</groupId>
                     <artifactId>annotation-order-check</artifactId>
-                    <version>1.0.3</version>
+                    <version>1.0.4</version>
                 </dependency>
             </dependencies>
             <configuration>
