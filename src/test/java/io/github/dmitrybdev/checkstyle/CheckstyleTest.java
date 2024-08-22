@@ -23,30 +23,29 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @TestInstance(PER_CLASS)
 public abstract class CheckstyleTest {
-    protected abstract Class<? extends AbstractCheck> getCheckClass();
-    protected abstract void configure(DefaultConfiguration configuration);
-
+    protected abstract Collection<AbstractCheck> getChecks();
     protected abstract void createTestCases(Map<String, Collection<String>> testCases);
 
 
     @ParameterizedTest
     @MethodSource("getTestCases")
     public final void check(String source, Collection<String> expectedViolations) throws Exception {
-        AbstractCheck check = getCheckClass().getConstructor().newInstance();
-        check.init();
-        DefaultConfiguration configuration = new DefaultConfiguration("Test");
-        configure(configuration);
-        check.configure(configuration);
-
         TreeWalker treeWalker = new TreeWalker();
         treeWalker.setModuleFactory(new PackageObjectFactory(
                 PackageNamesLoader.getPackageNames(this.getClass().getClassLoader()),
                 this.getClass().getClassLoader()
         ));
-        MethodUtils.invokeMethod(treeWalker, true, "registerCheck", check);
+
+        Collection<AbstractCheck> checks = getChecks();
+        for (AbstractCheck check : checks) {
+            check.init();
+            check.configure(new DefaultConfiguration("Test"));
+            MethodUtils.invokeMethod(treeWalker, true, "registerCheck", check);
+        }
+
         treeWalker.process(new File("Test.java"), new FileText(null, source.lines().toList()));
 
-        Collection<String> actualViolations = check.getViolations().stream()
+        Collection<String> actualViolations = checks.stream().flatMap(c -> c.getViolations().stream())
                 .map(v -> "%d:%d %s".formatted(v.getLineNo(), v.getColumnNo(), v.getViolation()))
                 .toList();
 

@@ -1,6 +1,5 @@
 package io.github.dmitrybdev.checkstyle;
 
-import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 
 import java.util.Collection;
@@ -10,25 +9,22 @@ import java.util.Map;
 class AnnotationOrderCheckTest extends CheckstyleTest {
 
     @Override
-    protected Class<? extends AbstractCheck> getCheckClass() {
-        return AnnotationOrderCheck.class;
-    }
-
-    @Override
-    protected void configure(DefaultConfiguration configuration) {
-        configuration.addProperty("typeTemplate", """
+    protected Collection<AbstractCheck> getChecks() {
+        AnnotationOrderCheck annotationOrderCheck = new AnnotationOrderCheck();
+        annotationOrderCheck.setTypeTemplate("""
             @spring.Component @Lazy @Order, @Getter @Setter
             public private final static
         """);
-        configuration.addProperty("fieldTemplate", """
+        annotationOrderCheck.setFieldTemplate("""
             @Lazy
             @Getter() @Setter()
             @Getter @Setter public private final static @Nullable
         """);
-        configuration.addProperty("methodTemplate", """
+        annotationOrderCheck.setMethodTemplate("""
             @Bean @Lazy @Order
             public private final static @Nullable
         """);
+        return List.of(annotationOrderCheck);
     }
 
     @Override
@@ -45,7 +41,7 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
                 
                     @Lazy private
                     final String field2;
-    
+                
                     @Getter() private String field3;
                 
                     @Order @Bean
@@ -72,10 +68,10 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
                 public class TestClass {
                     @Lazy
                     @Getter private final @Nullable String field;
-    
+                
                     @Lazy
                     private final String field2;
-    
+                
                     @Getter()
                     private String field3;
                 

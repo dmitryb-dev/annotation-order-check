@@ -3,8 +3,6 @@ package io.github.dmitrybdev.checkstyle;
 import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.FullIdent;
-import com.puppycrawl.tools.checkstyle.api.TokenTypes;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,17 +17,9 @@ public class AnnotationOrderCheck extends AbstractCheck {
     private Map<String, ExpectedOrder> methodTemplate = Map.of();
 
 
-    public void setTypeTemplate(String typeTemplate) {
-        this.typeTemplate = parseTemplate(typeTemplate);
-    }
-
-    public void setFieldTemplate(String fieldTemplate) {
-        this.fieldTemplate = parseTemplate(fieldTemplate);
-    }
-
-    public void setMethodTemplate(String methodTemplate) {
-        this.methodTemplate = parseTemplate(methodTemplate);
-    }
+    public void setTypeTemplate(String typeTemplate) { this.typeTemplate = parseTemplate(typeTemplate); }
+    public void setFieldTemplate(String fieldTemplate) { this.fieldTemplate = parseTemplate(fieldTemplate); }
+    public void setMethodTemplate(String methodTemplate) { this.methodTemplate = parseTemplate(methodTemplate); }
 
     private Map<String, ExpectedOrder> parseTemplate(String template) {
         HashMap<String, ExpectedOrder> parsedTemplate = new HashMap<>();
@@ -50,18 +40,19 @@ public class AnnotationOrderCheck extends AbstractCheck {
 
     @Override
     public int[] getDefaultTokens() {
-        return new int[] { CLASS_DEF, INTERFACE_DEF, ANNOTATION_DEF, RECORD_DEF, VARIABLE_DEF, CTOR_DEF, METHOD_DEF };
+        return getAcceptableTokens();
     }
 
     @Override
     public int[] getAcceptableTokens() {
-        return getDefaultTokens();
+        return new int[] { CLASS_DEF, INTERFACE_DEF, RECORD_DEF, ANNOTATION_DEF, VARIABLE_DEF, ANNOTATION_FIELD_DEF, CTOR_DEF, METHOD_DEF };
     }
 
     @Override
     public int[] getRequiredTokens() {
         return new int[] {};
     }
+
 
     @Override
     public void visitToken(DetailAST ast) {
@@ -79,23 +70,20 @@ public class AnnotationOrderCheck extends AbstractCheck {
             if (expectedOrder == null) continue;
 
             if (expectedOrder.order() < lastFoundModifierExpectedOrder.order()) {
-                log(
-                        modifier.getLineNo(), modifier.getColumnNo(),
+                log(modifier.getLineNo(), modifier.getColumnNo(),
                         "{0} must be placed before {1}", modifierText, lastFoundModifierText
                 );
             }
             if (!lastFoundModifierText.equals(modifierText)
                     && expectedOrder.lineNo() == lastFoundModifierExpectedOrder.lineNo()
                     && modifier.getLineNo() != lastFoundModifierLineNo) {
-                log(
-                        modifier.getLineNo(), modifier.getColumnNo(),
+                log(modifier.getLineNo(), modifier.getColumnNo(),
                         "{0} must be placed on the same line with {1}", modifierText, lastFoundModifierText
                 );
             }
             if (expectedOrder.lineNo() > lastFoundModifierExpectedOrder.lineNo()
                     && modifier.getLineNo() <= lastFoundModifierLineNo) {
-                log(
-                        modifier.getLineNo(), modifier.getColumnNo(),
+                log(modifier.getLineNo(), modifier.getColumnNo(),
                         "{0} must be placed on the new line after {1}", modifierText, lastFoundModifierText
                 );
             }
@@ -109,7 +97,7 @@ public class AnnotationOrderCheck extends AbstractCheck {
     private Map<String, ExpectedOrder> getTemplate(DetailAST ast) {
         return switch (ast.getType()) {
             case CLASS_DEF, INTERFACE_DEF, ANNOTATION_DEF, RECORD_DEF -> typeTemplate;
-            case VARIABLE_DEF -> fieldTemplate;
+            case VARIABLE_DEF, ANNOTATION_FIELD_DEF -> fieldTemplate;
             case CTOR_DEF, METHOD_DEF -> methodTemplate;
             default -> Map.of();
         };
