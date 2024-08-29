@@ -41,7 +41,7 @@ public class BoundaryCheck extends AbstractModifiersCheck {
 
 
     private int getLength(DetailAST ast) {
-        if (ast.getType() == LCURLY) return 1;
+        if (ast.getType() == LCURLY || ast.getType() == COMMA) return 1;
         if (ast.getType() == METHOD_DEF && ast.getLastChild().getType() == SLIST) {
             return ast.getLastChild().getLastChild().getLineNo() - ast.getLineNo() + 1;
         }

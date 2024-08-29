@@ -14,7 +14,7 @@ class DeclarationOrderCheckTest extends CheckstyleTest {
         declarationOrderCheck.setTemplate("""
             field
             public method
-            public getter
+            public method getter
             public class
             private class
         """);
@@ -37,7 +37,7 @@ class DeclarationOrderCheckTest extends CheckstyleTest {
                 }
                 """,
                 List.of(
-                        "3:5 public method must be placed before public getter",
+                        "3:5 public method must be placed before public method getter",
                         "4:5 field must be placed before public method",
                         "6:1 public class must be placed before private class",
                         "8:5 public class must be placed before private class"

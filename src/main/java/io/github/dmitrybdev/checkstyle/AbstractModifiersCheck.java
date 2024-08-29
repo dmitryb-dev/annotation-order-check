@@ -3,7 +3,6 @@ package io.github.dmitrybdev.checkstyle;
 import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.FullIdent;
-import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -13,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.puppycrawl.tools.checkstyle.api.TokenTypes.*;
+import static java.util.Comparator.comparing;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
@@ -81,7 +81,8 @@ public class AbstractModifiersCheck extends AbstractCheck {
         return Stream.of(
                 Stream.iterate(getModifiersAst(ast), Objects::nonNull, DetailAST::getNextSibling),
                 Stream.ofNullable(ast.findFirstToken(TYPE)),
-                Stream.of(ast)
+                Stream.of(ast),
+                Stream.ofNullable(ast.findFirstToken(IDENT))
         )
                 .flatMap(identity())
                 .map(this::getModifier)
@@ -100,11 +101,9 @@ public class AbstractModifiersCheck extends AbstractCheck {
         if (ast == null) return null;
         if (ast.getType() == ANNOTATION) return getAnnotation(ast);
         if (ast.getType() == TYPE) return new Modifier("type", ast);
-        if (ast.getType() == METHOD_DEF) {
-            if (isGetter(ast)) return new Modifier("getter", ast);
-            if (isSetter(ast)) return new Modifier("setter", ast);
-            return new Modifier("method", ast);
-        }
+        if (ast.getType() == METHOD_DEF) return new Modifier("method", ast);
+        if (ast.getType() == IDENT && isGetter(ast)) return new Modifier("getter", ast);
+        if (ast.getType() == IDENT && isSetter(ast)) return new Modifier("setter", ast);
         if (ast.getType() == CTOR_DEF) return new Modifier("constructor", ast);
         if (ast.getType() == CLASS_DEF) return new Modifier("class", ast);
         if (ast.getType() == INTERFACE_DEF) return new Modifier("interface", ast);
@@ -128,28 +127,30 @@ public class AbstractModifiersCheck extends AbstractCheck {
     }
 
 
-    private boolean isGetter(DetailAST ast) {
-        String name = ast.findFirstToken(IDENT).getText();
+    private boolean isGetter(DetailAST ident) {
+        if (ident.getParent().getType() != METHOD_DEF) return false;
+        String name = ident.getText();
 
         if (name.length() < 4) return false;
         if (!name.startsWith("get") && !name.startsWith("is")) return false;
         if (!Character.isUpperCase(name.charAt(2)) && !Character.isUpperCase(name.charAt(3))) return false;
 
-        DetailAST params = ast.findFirstToken(PARAMETERS);
+        DetailAST params = ident.getParent().findFirstToken(PARAMETERS);
         if (params == null || params.getChildCount() > 0) return false;
 
-        DetailAST returnType = ast.findFirstToken(TYPE).getFirstChild();
+        DetailAST returnType = ident.getParent().findFirstToken(TYPE).getFirstChild();
         return returnType.getType() != LITERAL_VOID;
     }
 
-    private boolean isSetter(DetailAST ast) {
-        String name = ast.findFirstToken(IDENT).getText();
+    private boolean isSetter(DetailAST ident) {
+        if (ident.getParent().getType() != METHOD_DEF) return false;
+        String name = ident.getText();
 
         if (name.length() < 4) return false;
         if (!name.startsWith("set")) return false;
         if (!Character.isUpperCase(name.charAt(3))) return false;
 
-        DetailAST params = ast.findFirstToken(PARAMETERS);
+        DetailAST params = ident.getParent().findFirstToken(PARAMETERS);
         return params != null && params.getChildCount() == 1;
     }
 
@@ -170,7 +171,8 @@ public class AbstractModifiersCheck extends AbstractCheck {
         public @Nullable GroupOrder getOrder(List<Modifier> modifiers) {
             return groups.stream()
                     .filter(group -> group.matches(modifiers))
-                    .findFirst().orElse(null);
+                    .max(comparing(group -> group.modifiers().size()))
+                    .orElse(null);
         }
 
         public @Nullable ModifierOrder getOrder(Modifier modifier) {
