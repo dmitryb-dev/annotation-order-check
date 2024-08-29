@@ -22,7 +22,7 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
         """);
         annotationOrderCheck.setMethodTemplate("""
             @Bean @Lazy @Order
-            public private final static @Nullable
+            public private final static @Nullable type
         """);
         return List.of(annotationOrderCheck);
     }

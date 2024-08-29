@@ -21,14 +21,14 @@ class BoundaryCheckTest extends CheckstyleTest {
 
         BoundaryCheck classBoundary = new BoundaryCheck();
         classBoundary.setAfter("method, field");
-        classBoundary.setBefore("class");
+        classBoundary.setBefore("class, interface");
         classBoundary.setMinNewLines(2);
 
         BoundaryCheck getterSetterBoundary = new BoundaryCheck();
         getterSetterBoundary.setAfter("getter");
         getterSetterBoundary.setBefore("setter");
         getterSetterBoundary.setMinNewLines(1);
-        getterSetterBoundary.setCommentsAsNewLines(false);
+        getterSetterBoundary.setCommentsAsNewLines(0);
 
         return List.of(singleLineStatementsBoundary, privatePublicBoundary, classBoundary, getterSetterBoundary);
     }

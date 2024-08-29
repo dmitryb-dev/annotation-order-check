@@ -6,7 +6,7 @@
 
     <groupId>io.github.dmitryb-dev</groupId>
     <artifactId>annotation-order-check</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
 
     <name>Annotation/modifier order check</name>
     <description>Enforce the order and placement of annotations and modifiers in Java with customizable templates</description>

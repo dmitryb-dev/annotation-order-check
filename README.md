@@ -43,11 +43,11 @@ for example, using the `maven-checkstyle-plugin` in your `pom.xml`:
                                 <property name="fieldTemplate" value="
                                     @Lazy
                                     @Getter() @Setter()
-                                    @Getter @Setter public private final static @Nullable
+                                    @Getter @Setter public private final static @Nullable type
                                 "/>
                                 <property name="methodTemplate" value="
                                     @Bean @Lazy @Order
-                                    public private final static @Nullable
+                                    public private final static @Nullable type
                                 "/>
                             </module>
                         </module>

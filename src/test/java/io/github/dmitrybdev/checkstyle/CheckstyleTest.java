@@ -43,7 +43,8 @@ public abstract class CheckstyleTest {
             MethodUtils.invokeMethod(treeWalker, true, "registerCheck", check);
         }
 
-        treeWalker.process(new File("Test.java"), new FileText(null, source.lines().toList()));
+        var file = new File("Test.java");
+        treeWalker.process(file, new FileText(file, source.lines().toList()));
 
         Collection<String> actualViolations = checks.stream().flatMap(c -> c.getViolations().stream())
                 .map(v -> "%d:%d %s".formatted(v.getLineNo(), v.getColumnNo(), v.getViolation()))
