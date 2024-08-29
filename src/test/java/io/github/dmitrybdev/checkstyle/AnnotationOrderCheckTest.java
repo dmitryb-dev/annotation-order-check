@@ -10,7 +10,7 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
 
     @Override
     protected Collection<AbstractCheck> getChecks() {
-        AnnotationOrderCheck annotationOrderCheck = new AnnotationOrderCheck();
+        var annotationOrderCheck = new AnnotationOrderCheck();
         annotationOrderCheck.setTypeTemplate("""
             @spring.Component @Lazy @Order, @Getter @Setter
             public private final static
@@ -45,7 +45,8 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
                     @Getter() private String field3;
                 
                     @Order @Bean
-                    @Nullable int bean() {}
+                    @Nullable
+                    int bean() {}
                 }
                 """,
                 List.of(
@@ -57,7 +58,8 @@ class AnnotationOrderCheckTest extends CheckstyleTest {
                         "8:11 private must be placed on the new line after @Lazy",
                         "9:5 final must be placed on the same line with private",
                         "11:15 private must be placed on the new line after @Getter()",
-                        "13:12 @Bean must be placed before @Order"
+                        "13:12 @Bean must be placed before @Order",
+                        "15:5 type must be placed on the same line with @Nullable"
                 )
         );
         testCases.put(

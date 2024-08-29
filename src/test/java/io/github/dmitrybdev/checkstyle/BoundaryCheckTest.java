@@ -10,21 +10,21 @@ class BoundaryCheckTest extends CheckstyleTest {
 
     @Override
     protected Collection<AbstractCheck> getChecks() {
-        BoundaryCheck singleLineStatementsBoundary = new BoundaryCheck();
+        var singleLineStatementsBoundary = new BoundaryCheck();
         singleLineStatementsBoundary.setMinLength(3);
         singleLineStatementsBoundary.setMinNewLines(1);
 
-        BoundaryCheck privatePublicBoundary = new BoundaryCheck();
+        var privatePublicBoundary = new BoundaryCheck();
         privatePublicBoundary.setAfter("private method, field");
         privatePublicBoundary.setBefore("public method, public getter");
         privatePublicBoundary.setMinNewLines(2);
 
-        BoundaryCheck classBoundary = new BoundaryCheck();
+        var classBoundary = new BoundaryCheck();
         classBoundary.setAfter("method, field");
         classBoundary.setBefore("class, interface");
         classBoundary.setMinNewLines(2);
 
-        BoundaryCheck getterSetterBoundary = new BoundaryCheck();
+        var getterSetterBoundary = new BoundaryCheck();
         getterSetterBoundary.setAfter("getter");
         getterSetterBoundary.setBefore("setter");
         getterSetterBoundary.setMinNewLines(1);
@@ -124,7 +124,7 @@ class BoundaryCheckTest extends CheckstyleTest {
                 // language=Java
                 """
                 public class TestClass {
-    
+                
                     private int value() {
                         int value = 3;
                         int value2 = 4;

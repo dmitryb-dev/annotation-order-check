@@ -204,6 +204,13 @@ public class AbstractModifiersCheck extends AbstractCheck {
             return this.modifiers.stream()
                     .allMatch(modifierOrder -> modifierOrder.matches(modifiers));
         }
+
+        @Override
+        public String toString() {
+            return modifiers.stream()
+                    .map(ModifierOrder::toString)
+                    .collect(joining(" "));
+        }
     }
 
     public record ModifierOrder(String modifier, boolean hasArgs, int groupOrder, int order) {
